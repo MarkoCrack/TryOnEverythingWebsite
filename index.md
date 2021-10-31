@@ -1,37 +1,183 @@
-## Welcome to GitHub Pages
+<html><head>
+    <title>Roblox Maintenance</title>
+    <link rel="shortcut icon" type="icon/png" href="Icon.png">
+    <style type="text/css">
+        html {
+            height: 100%;
+        }
 
-You can use the [editor on GitHub](https://github.com/MarkoCrack/TryOnEverythingWebsite/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 24px;
+            font-weight: 300;
+            height: auto;
+            line-height: 24px;
+            margin: 0;
+            min-width: 320px;
+            text-align: center;
+            overflow: hidden;
+        }
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+        .header {
+            padding: 50px 0 20px;
+        }
 
-### Markdown
+        .header img {
+            width: auto;
+            margin: 0 auto;
+        }
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+        @media screen and (max-width: 768px) {
+            .header img {
+                width: 100%;
+                height: auto;
+            }
+        }
 
-```markdown
-Syntax highlighted code block
+        .content {
+            text-align: center;
+        }
 
-# Header 1
-## Header 2
-### Header 3
+        .notification {
+            width: auto;
+            height: auto;
+            padding: 12px 20px;
+            margin: 0 auto;
+            line-height: 36px;
+            font-style: normal;
+            font-weight: 300;
+            color: #fff;
+        }
 
-- Bulleted
-- List
+        .count-down {
+            color: #f68802;
+            font-weight: 300;
+        }
 
-1. Numbered
-2. List
+            .count-down h1 {
+                font-weight: 300;
+            }
 
-**Bold** and _Italic_ and `Code` text
+                .count-down h1.timer {
+                    font-weight: 600;
+                }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,regular,600">
+</head>
+<body>
+    <div class="header">
+        <img src="https://images.rbxcdn.com/6ef6e892aea640c3b1f79f0f820caca5" alt="We're making things more awesome.  Be back soon.">
+    </div>
+    <div class="content">
+        <div id="countDown" class="count-down">
+        </div>
+    </div>
+    <script type="text/javascript">
+        function countdownLayout(isVisiable) {
+            var countdownElm = document.getElementById("countDown");
+            var countDownTimeHtml = "<h1>Down time: </h1><h1 id='timer' class='timer'></h1>";
+            if (isVisiable) {
+                countdownElm.innerHTML = countDownTimeHtml;
+            } else {
+                countdownElm.innerHTML = "";
+            }
+        }
 
-[Link](url) and ![Image](src)
-```
+        function formatCountDown(time) {
+            var _second = 1000;
+            var _minute = _second * 60;
+            var _hour = _minute * 60;
+            var _day = _hour * 24;
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+            var days = Math.floor(time / _day);
+            var hours = Math.floor((time % _day) / _hour);
+            var minutes = Math.floor((time % _hour) / _minute);
+            var countdownString = "";
+            if (days) {
+                countdownString = (days == 1) ? days + " day " : days + " days ";
+            }
 
-### Jekyll Themes
+            if (hours == 1 || hours == 0) {
+                countdownString += "0" + hours + " hr ";
+            } else {
+                if (hours < 10) {
+                    hours = "0" + hours;
+                }
+                countdownString += hours + " hrs ";
+            }
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/MarkoCrack/TryOnEverythingWebsite/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+            if (minutes == 1 || minutes == 0) {
+                countdownString += "0" + minutes + " min ";
+            } else {
+                if (minutes < 10) {
+                    minutes = "0" + minutes;
+                }
+                countdownString += minutes + " mins ";
+            }
 
-### Support or Contact
+            if (time <= _minute) {
+                var seconds = Math.floor((time % _minute) / _second);
+                countdownString += seconds + " secs ";
+            }
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+            return countdownString;
+        }
+
+        function getQuery() {
+            var query = location.search;
+            var result = { isQuerySet: false, params: {} };
+            if (query.length > 0 && query.slice(1).length > 0) {
+                var queries = query.slice(1).split("&");
+                result.isQuerySet = true;
+                for (var i = 0; i < queries.length; i++) {
+                    var tmp = queries[i].split("=");
+                    result.params[tmp[0]] = tmp[1];
+                }
+            }
+            return result;
+        }
+
+        function timer(params) {
+            var refreshIntervalId;
+            var endTimeString = params['month'] + "/" + params['day'] + "/" + params['year'] + " " + params['hour'] + ":" + params['min'] + " UTC";
+
+            function setTime() {
+                var end = new Date(endTimeString);
+                var now = new Date();
+                var remaining = end - now;
+                if (remaining > 0) {
+                    var countdownString = formatCountDown(remaining);
+
+                    if (document.getElementById("countDown").children.length === 0) {
+                        countdownLayout(true);
+                    }
+                    var countdownElm = document.getElementById("timer");
+                    countdownElm.innerHTML = countdownString;
+
+                } else {
+                    clearInterval(refreshIntervalId);
+                    countdownLayout(false);
+                    return;
+                }
+            }
+
+            refreshIntervalId = setInterval(setTime, 1000);
+        }
+
+        window.onload = function () {
+            // We use a form post to get around browsers caching repeated 302s on GETs
+            window.setTimeout("document.forms[0].submit();", 30000);
+            var result = getQuery();
+            if (result.isQuerySet) {
+                timer(result.params);
+            }
+        };
+
+    </script>
+
+    <form method="POST" action="https://www.roblox.com/"></form>
+
+
+</body></html>
